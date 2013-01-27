@@ -94,8 +94,8 @@ def get_interface(target):
     optional = dict(zip(args[-len(defaultvals):], defaultvals))
 
     required = args
-    # TODO: better to test if this is a bounded method
-    if target.__name__ == '__init__':
+    if inspect.ismethod(target):
+        # skip bounded self argument
         required = args[1:]
     if defaultvals:
         required = required[:-len(defaultvals)]
@@ -163,6 +163,12 @@ def select_command(argv, target):
 def run(argv, target):
     if isinstance(target, (tuple, list)):
         return select_command(argv, target)
+
+    if not callable(target):
+        # try and use as an object
+        return select_command(argv,
+            [getattr(target, x) for x in dir(target) if not x.startswith('_')])
+
     a, kw = parse(argv, target)
     return target(*a, **kw)
 

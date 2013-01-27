@@ -43,10 +43,20 @@ class InterfaceTest(unittest.TestCase):
         options, a = parser.parse_args(argv)
         self.assertEqual(options.to_email, 'ted')
 
-    def test_select_command(self):
+    def test_select_command_from_tuple(self):
         def m_1(a):
             return a
         def m_2(b=2):
             return b
         self.assertEqual(lastopt.run(['m-1', 3], [m_1, m_2]), 3)
         self.assertEqual(lastopt.run(['m-2'], [m_1, m_2]), 2)
+
+    def test_select_command_from_class(self):
+        class C(object):
+            def m_1(self, a):
+                return a
+            def m_2(self, b=2):
+                return b
+        c = C()
+        self.assertEqual(lastopt.run(['m-1', 3], c), 3)
+        self.assertEqual(lastopt.run(['m-2'], c), 2)
