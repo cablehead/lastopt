@@ -119,9 +119,22 @@ def parse(argv, target):
     required, optional = get_interface(target)
     args = argv[1:]
     if len(args) < len(required):
+        print usage(argv, target)
         sys.exit(1)
     a = args[:len(required)]
-    return a, {}
+
+    args = args[len(required):]
+    if optional:
+        parser = to_OptionParser(optional)
+        opt, remaining = parser.parse_args(args)
+        # TODO: create ability to chain sub-commands
+        # TODO: should show full usage
+        if remaining:
+            print usage(argv, target)
+            sys.exit(1)
+        kw = opt.__dict__
+
+    return a, kw
 
 
 def run(argv, target):

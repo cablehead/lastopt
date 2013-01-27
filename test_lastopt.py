@@ -38,3 +38,7 @@ class InterfaceTest(unittest.TestCase):
         options, a = parser.parse_args(argv)
         self.assertEqual(options.toggle, True)
 
+        parser = lastopt.to_OptionParser({'to_email': 'bar'})
+        argv = ['--to-email', 'ted']
+        options, a = parser.parse_args(argv)
+        self.assertEqual(options.to_email, 'ted')
