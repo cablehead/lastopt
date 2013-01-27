@@ -129,21 +129,13 @@ def parse(argv, target):
     a = args[:len(required)]
 
     args = args[len(required):]
-    kw = {}
-    if optional:
-        opt, remaining = parser.parse_args(args)
-        # TODO: create ability to chain sub-commands
-        if remaining:
-            print usage(argv, target)
-            parser.print_help()
-            sys.exit(1)
-        kw = opt.__dict__
-
-    return a, kw
+    opt, remaining = parser.parse_args(args)
+    kw = opt.__dict__
+    return a, kw, remaining
 
 
 def select_command(argv, target):
-    commands = dict((x.__name__.replace('_', '-'), x) for x in target)
+    commands = dict((x.__name__.lower().replace('_', '-'), x) for x in target)
     try:
         command = commands[argv[0]]
     except KeyError, IndexError:
@@ -167,10 +159,14 @@ def run(argv, target):
     if not callable(target):
         # try and use as an object
         return select_command(argv,
-            [getattr(target, x) for x in dir(target) if not x.startswith('_')])
+            [getattr(target, x) for x in dir(target)
+                if not x.startswith('_') and callable(getattr(target, x))])
 
-    a, kw = parse(argv, target)
-    return target(*a, **kw)
+    a, kw, remaining = parse(argv, target)
+    target = target(*a, **kw)
+    if not remaining:
+        return target
+    return run(remaining, target)
 
 
 def main(target):
