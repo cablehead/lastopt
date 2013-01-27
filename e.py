@@ -11,6 +11,7 @@ import lastopt
 
 @lastopt.main
 def hello(first, second, world='world'):
+    """hello world"""
     print first, second, world
 
 
