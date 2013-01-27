@@ -42,3 +42,11 @@ class InterfaceTest(unittest.TestCase):
         argv = ['--to-email', 'ted']
         options, a = parser.parse_args(argv)
         self.assertEqual(options.to_email, 'ted')
+
+    def test_select_command(self):
+        def m_1(a):
+            return a
+        def m_2(b=2):
+            return b
+        self.assertEqual(lastopt.run(['m-1', 3], [m_1, m_2]), 3)
+        self.assertEqual(lastopt.run(['m-2'], [m_1, m_2]), 2)

@@ -129,6 +129,7 @@ def parse(argv, target):
     a = args[:len(required)]
 
     args = args[len(required):]
+    kw = {}
     if optional:
         opt, remaining = parser.parse_args(args)
         # TODO: create ability to chain sub-commands
@@ -141,9 +142,29 @@ def parse(argv, target):
     return a, kw
 
 
+def select_command(argv, target):
+    commands = dict((x.__name__.replace('_', '-'), x) for x in target)
+    try:
+        command = commands[argv[0]]
+    except KeyError, IndexError:
+        def format(name, command):
+            summary = ""
+            if command.__doc__:
+                summary = command.__doc__.strip().split('\n')[0]
+            return "    %-10s%s" % (name, summary)
+        print 'Usage: %s COMMAND [ARGS]\n\nThe available commands are:' % \
+            sys.argv[0]
+        print '\n'.join(format(*item) for item in commands.iteritems())
+        return
+
+    return run(argv, command)
+
+
 def run(argv, target):
+    if isinstance(target, (tuple, list)):
+        return select_command(argv, target)
     a, kw = parse(argv, target)
-    target(*a, **kw)
+    return target(*a, **kw)
 
 
 def main(target):
