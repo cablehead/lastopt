@@ -10,8 +10,8 @@ bork install msginabox
 import lastopt
 
 @lastopt.main
-def hello(first, world='world'):
-    print 'hello %s %s' % (first, world)
+def hello(first, second, world='world'):
+    print first, second, world
 
 
 # @lastopt.main
