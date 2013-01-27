@@ -6,7 +6,7 @@ from optparse import OptionParser
 from optparse import make_option
 
 
-def to_OptionParser(options):
+def to_OptionParser(options, usage=None):
     # add options, automatically detecting their -short and --long names
 
     single_char_prefix_re = re.compile('^[a-zA-Z0-9]_')
@@ -23,7 +23,7 @@ def to_OptionParser(options):
     # helpdict = getattr(func, 'optfunc_arghelp', {})
     helpdict = {}
 
-    opt = OptionParser()
+    opt = OptionParser(usage)
 
     shortnames = set(['h'])
     for name in options.iterkeys():
@@ -106,9 +106,7 @@ def get_interface(target):
 def usage(argv, target):
     required, optional = get_interface(target)
     ret = ''
-    if target.__doc__:
-        ret += target.__doc__ + '\n'
-    ret += "usage: %s %s%s" % (
+    ret += "%s %s%s" % (
         argv[0],
         ' '.join('<%s>' % a for a in required),
         optional and ' [options]' or '')
@@ -117,20 +115,26 @@ def usage(argv, target):
 
 def parse(argv, target):
     required, optional = get_interface(target)
+    parser = to_OptionParser(optional, usage=usage(argv, target))
+
     args = argv[1:]
+
+    if len(args) == 1 and args[0] in ['-h', '--help']:
+        parser.print_help()
+        sys.exit(0)
+
     if len(args) < len(required):
-        print usage(argv, target)
+        print "Usage:", usage(argv, target)
         sys.exit(1)
     a = args[:len(required)]
 
     args = args[len(required):]
     if optional:
-        parser = to_OptionParser(optional)
         opt, remaining = parser.parse_args(args)
         # TODO: create ability to chain sub-commands
-        # TODO: should show full usage
         if remaining:
             print usage(argv, target)
+            parser.print_help()
             sys.exit(1)
         kw = opt.__dict__
 
