@@ -138,7 +138,7 @@ def run(parsed, target, argv):
             (x.__name__.lower().replace('_', '-'), x) for x in target)
         try:
             target = choices[argv[0]]
-        except KeyError, IndexError:
+        except (KeyError, IndexError):
             def format(name, choice):
                 summary = ""
                 if choice.__doc__:
@@ -147,6 +147,7 @@ def run(parsed, target, argv):
             print 'Usage: %s COMMAND [ARGS]\n\nThe available commands are:' % \
                 parsed
             print '\n'.join(format(*item) for item in choices.iteritems())
+            return
         parsed += ' %s' % argv[0]
         argv = argv[1:]
 
@@ -164,5 +165,5 @@ def main(target):
     if module is None or \
             module.__name__ == '<module>' or \
             module.__name__ == '__main__':
-        run(sys.argv[0], sys.argv[1:], target)
+        run(sys.argv[0], target, sys.argv[1:])
     return target # for use as decorator

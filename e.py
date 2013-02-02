@@ -14,8 +14,3 @@ def install(package):
 
 
 lastopt.main([Env, install])
-
-
-bork install redis
-
-bork env production start frontend
