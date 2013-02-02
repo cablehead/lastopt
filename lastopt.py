@@ -89,7 +89,6 @@ def get_interface(target):
         target = target.__init__
 
     args, varargs, varkw, defaultvals = inspect.getargspec(target)
-
     defaultvals = defaultvals or ()
     optional = dict(zip(args[-len(defaultvals):], defaultvals))
 
@@ -103,70 +102,61 @@ def get_interface(target):
     return required, optional
 
 
-def usage(argv, target):
+def parse(parsed, target, argv):
     required, optional = get_interface(target)
-    ret = ''
-    ret += "%s %s%s" % (
-        argv[0],
+
+    usage = "%s %s%s" % (
+        parsed,
         ' '.join('<%s>' % a for a in required),
         optional and ' [options]' or '')
-    return ret
 
+    parser = to_OptionParser(optional, usage=usage)
 
-def parse(argv, target):
-    required, optional = get_interface(target)
-    parser = to_OptionParser(optional, usage=usage(argv, target))
-
-    args = argv[1:]
-
-    if len(args) == 1 and args[0] in ['-h', '--help']:
+    if len(argv) == 1 and argv[0] in ['-h', '--help']:
         parser.print_help()
         sys.exit(0)
 
-    if len(args) < len(required):
-        print "Usage:", usage(argv, target)
+    if len(argv) < len(required):
+        print "Usage:", usage
         sys.exit(1)
-    a = args[:len(required)]
 
-    args = args[len(required):]
-    opt, remaining = parser.parse_args(args)
+    a = argv[:len(required)]
+    opt, remaining = parser.parse_args(argv[len(required):])
     kw = opt.__dict__
-    return a, kw, remaining
+    parsed += ' '.join(str(x) for x in argv[:-len(remaining)])
+    return a, kw, parsed, remaining
 
 
-def select_command(argv, target):
-    commands = dict((x.__name__.lower().replace('_', '-'), x) for x in target)
-    try:
-        command = commands[argv[0]]
-    except KeyError, IndexError:
-        def format(name, command):
-            summary = ""
-            if command.__doc__:
-                summary = command.__doc__.strip().split('\n')[0]
-            return "    %-10s%s" % (name, summary)
-        print 'Usage: %s COMMAND [ARGS]\n\nThe available commands are:' % \
-            sys.argv[0]
-        print '\n'.join(format(*item) for item in commands.iteritems())
-        return
-
-    return run(argv, command)
-
-
-def run(argv, target):
-    if isinstance(target, (tuple, list)):
-        return select_command(argv, target)
-
-    if not callable(target):
+def run(parsed, target, argv):
+    if not isinstance(target, (tuple, list)) and not callable(target):
         # try and use as an object
-        return select_command(argv,
-            [getattr(target, x) for x in dir(target)
-                if not x.startswith('_') and callable(getattr(target, x))])
+        target = [getattr(target, x) for x in dir(target)
+                if not x.startswith('_') and callable(getattr(target, x))]
 
-    a, kw, remaining = parse(argv, target)
+    if isinstance(target, (tuple, list)):
+        choices = dict(
+            (x.__name__.lower().replace('_', '-'), x) for x in target)
+        try:
+            target = choices[argv[0]]
+        except KeyError, IndexError:
+            def format(name, choice):
+                summary = ""
+                if choice.__doc__:
+                    summary = choice.__doc__.strip().split('\n')[0]
+                return "    %-10s%s" % (name, summary)
+            print 'Usage: %s COMMAND [ARGS]\n\nThe available commands are:' % \
+                parsed
+            print '\n'.join(format(*item) for item in choices.iteritems())
+        parsed += ' %s' % argv[0]
+        argv = argv[1:]
+
+    a, kw, parsed, remaining = parse(parsed, target, argv)
+
     target = target(*a, **kw)
     if not remaining:
         return target
-    return run(remaining, target)
+
+    return run(parsed, target, remaining)
 
 
 def main(target):
@@ -174,5 +164,5 @@ def main(target):
     if module is None or \
             module.__name__ == '<module>' or \
             module.__name__ == '__main__':
-        run(sys.argv, target)
+        run(sys.argv[0], sys.argv[1:], target)
     return target # for use as decorator

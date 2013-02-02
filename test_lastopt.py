@@ -10,13 +10,16 @@ class InterfaceTest(unittest.TestCase):
         got = lastopt.get_interface(f)
         self.assertEqual(got, (['a', 'b'], {'c': 1, 'd': 'foo'}))
 
+    def test_klass(self):
         class F(object):
             def __init__(self, a, b, c=1, d='foo'):
                 pass
         got = lastopt.get_interface(F)
         self.assertEqual(got, (['a', 'b'], {'c': 1, 'd': 'foo'}))
 
-    def test_to_OptionParser(self):
+
+class OptionParserTest(unittest.TestCase):
+    def test_core(self):
         parser = lastopt.to_OptionParser({'foo': 'bar'})
         argv = ['-f', 'ted']
         options, a = parser.parse_args(argv)
@@ -43,25 +46,27 @@ class InterfaceTest(unittest.TestCase):
         options, a = parser.parse_args(argv)
         self.assertEqual(options.to_email, 'ted')
 
-    def test_select_command_from_list_of_functions(self):
+
+class RunTest(unittest.TestCase):
+    def test_list_of_functions(self):
         def m_1(a):
             return a
         def m_2(b=2):
             return b
-        self.assertEqual(lastopt.run(['m-1', 3], [m_1, m_2]), 3)
-        self.assertEqual(lastopt.run(['m-2'], [m_1, m_2]), 2)
+        self.assertEqual(lastopt.run('foo', [m_1, m_2], ['m-1', 3],), 3)
+        self.assertEqual(lastopt.run('foo', [m_1, m_2], ['m-2'],), 2)
 
-    def test_select_command_from_class(self):
+    def test_klass(self):
         class C(object):
             def m_1(self, a):
                 return a
             def m_2(self, b=2):
                 return b
         c = C()
-        self.assertEqual(lastopt.run(['m-1', 3], c), 3)
-        self.assertEqual(lastopt.run(['m-2'], c), 2)
+        self.assertEqual(lastopt.run('foo', c, ['m-1', 3]), 3)
+        self.assertEqual(lastopt.run('foo', c, ['m-2']), 2)
 
-    def test_select_command_from_list_of_classes(self):
+    def test_list_of_klasses(self):
         class User(object):
             def __init__(self, user_id):
                 self.user_id = user_id
@@ -75,5 +80,5 @@ class InterfaceTest(unittest.TestCase):
                 return "members for room: %s" % self.room_id
 
         self.assertEqual(
-            lastopt.run(['user', 123, 'name'], [User, Room]),
+            lastopt.run('foo', [User, Room], ['user', 123, 'name']),
             'name for user: 123')

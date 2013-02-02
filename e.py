@@ -1,20 +1,21 @@
-
-"""
-bork env staging start msginabox -i c1.medium
-
-bork env staging.re run 
-
-bork install msginabox
-"""
-
 import lastopt
 
-@lastopt.main
-def hello(first, second, world='world'):
-    """hello world"""
-    print first, second, world
+
+class Env(object):
+    def __init__(self, name):
+        self.name = name
+
+    def start(self, package):
+        print "starting %s.%s" % (self.name, package)
 
 
-# @lastopt.main
-def hello(first, *a, **kw):
-    print 'hello %s' % (first,)
+def install(package):
+    print "install %s" % (package,)
+
+
+lastopt.main([Env, install])
+
+
+bork install redis
+
+bork env production start frontend
