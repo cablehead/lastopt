@@ -159,8 +159,8 @@ def run(parsed, target, argv):
 
     target = target(*a, **kw)
 
-    if remaining or target:
-        run(parsed, target, remaining)
+    if remaining or (target and not isinstance(target, (int, str))):
+        return run(parsed, target, remaining)
 
     return target
 
