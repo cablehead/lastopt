@@ -123,7 +123,11 @@ def parse(parsed, target, argv):
     a = argv[:len(required)]
     opt, remaining = parser.parse_args(argv[len(required):])
     kw = opt.__dict__
-    parsed += ' '.join(str(x) for x in argv[:-len(remaining)])
+    if remaining:
+        used = argv[:-len(remaining)]
+    else:
+        used = argv
+    parsed += ' ' + ' '.join(str(x) for x in used)
     return a, kw, parsed, remaining
 
 
@@ -154,10 +158,11 @@ def run(parsed, target, argv):
     a, kw, parsed, remaining = parse(parsed, target, argv)
 
     target = target(*a, **kw)
-    if not remaining:
-        return target
 
-    return run(parsed, target, remaining)
+    if remaining or target:
+        run(parsed, target, remaining)
+
+    return target
 
 
 def main(target):
