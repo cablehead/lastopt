@@ -64,5 +64,5 @@ $ ./command env production start frontend
 History
 -------
 
-lastopt is directly inspired by Simon Willson's clever introspection hack from
+lastopt is directly inspired by Simon Willison's clever introspection hack from
 a few years back: https://github.com/simonw/optfunc
