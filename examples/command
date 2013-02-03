@@ -1,4 +1,12 @@
+#!/usr/bin/env python
+
+
 import lastopt
+
+
+def install(package, dependencies=False):
+    print "install %s, with dependencies: %s" % (
+        package, dependencies and 'yes' or 'no')
 
 
 class Env(object):
@@ -9,8 +17,4 @@ class Env(object):
         print "starting %s.%s" % (self.name, package)
 
 
-def install(package):
-    print "install %s" % (package,)
-
-
-lastopt.main([Env, install])
+lastopt.main([install, Env])
