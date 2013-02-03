@@ -1,14 +1,20 @@
+lastopt
+=======
 
-"""
-bork env staging start msginabox -i c1.medium
+lastopt is a Python utility for quickly creating command line utilities using
+function and class introspection.
 
-bork env staging.re run 
+lastopt is licensed under the Apache Licence, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0.html).
 
-bork install msginabox
-"""
+Example
+-------
 
-import lastopt
 
-@lastopt.main
-def hello(world='world'):
-    print 'hello %s' % world
+
+
+History
+-------
+
+lastopt is directly inspired by Simon Willson's clever introspection hack from
+a few years back: https://github.com/simonw/optfunc
