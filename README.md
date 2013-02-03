@@ -13,14 +13,11 @@ Example
 ```python
 #!/usr/bin/env python
 
-
 import lastopt
-
 
 def install(package, dependencies=False):
     print "install %s, with dependencies: %s" % (
         package, dependencies and 'yes' or 'no')
-
 
 class Env(object):
     def __init__(self, name):
@@ -28,7 +25,6 @@ class Env(object):
 
     def start(self, package):
         print "starting %s.%s" % (self.name, package)
-
 
 lastopt.main([install, Env])
 ```
