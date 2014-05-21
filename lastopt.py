@@ -6,6 +6,9 @@ from optparse import OptionParser
 from optparse import make_option
 
 
+__version__ = '0.0.1'
+
+
 def to_OptionParser(options, usage=None):
     # add options, automatically detecting their -short and --long names
 
