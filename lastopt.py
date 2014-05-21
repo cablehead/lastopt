@@ -56,12 +56,15 @@ def to_OptionParser(options, usage=None):
         names.append(long_name)
 
         if isinstance(default, bool):
-            no_name='--no%s' % clean_name
-            opt.add_option(make_option(
-                no_name,
-                action='store_false',
-                dest=name,
-                help = helpdict.get(original, 'unset %s' % long_name)))
+            if default:
+                no_name='--no%s' % clean_name
+                opt.add_option(make_option(
+                    no_name,
+                    action='store_false',
+                    dest=name,
+                    help = helpdict.get(original, 'unset %s' % long_name)))
+                continue
+
             action = 'store_true'
 
         else:
