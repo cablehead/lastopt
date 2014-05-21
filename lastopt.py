@@ -6,7 +6,7 @@ from optparse import OptionParser
 from optparse import make_option
 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 
 def to_OptionParser(options, usage=None):
